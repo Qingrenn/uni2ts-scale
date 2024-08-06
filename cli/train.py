@@ -118,7 +118,7 @@ class DataModule(L.LightningDataModule):
 @hydra.main(version_base="1.3", config_name="default.yaml")
 def main(cfg: DictConfig):
     if cfg.tf32:
-        assert cfg.trainer.precision == 32
+        assert cfg.trainer.precision in [16, 32, 'bf16']
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
 
@@ -138,7 +138,7 @@ def main(cfg: DictConfig):
         if "val_data" in cfg
         else None
     )
-    L.seed_everything(cfg.seed + trainer.logger.version, workers=True)
+    L.seed_everything(cfg.seed, workers=True)
     trainer.fit(
         model,
         datamodule=DataModule(cfg, train_dataset, val_dataset),
