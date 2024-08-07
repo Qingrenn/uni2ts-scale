@@ -1,6 +1,6 @@
-_target_: tsfm.data.builder.ConcatDatasetBuilder
+_target_: uni2ts.data.builder.ConcatDatasetBuilder
 _args_:
-  - _target_: tsfm.data.builder.lotsa_v1.CMIP6DatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.CMIP6DatasetBuilder
     datasets: ${cls_getattr:${._target_},dataset_list}
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
@@ -38,9 +38,9 @@ _args_:
       cmip6_2005: 0.01562678125
       cmip6_2010: 0.01562678125
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]
-  - _target_: tsfm.data.builder.lotsa_v1.ERA5DatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.ERA5DatasetBuilder
     datasets: ${cls_getattr:${._target_},dataset_list}
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
@@ -75,17 +75,17 @@ _args_:
       era5_2017: 0.018335419761035664
       era5_2018: 0.018335419761035664
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]
-  - _target_: tsfm.data.builder.lotsa_v1.CloudOpsTSFDatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.CloudOpsTSFDatasetBuilder
     datasets: ["alibaba_cluster_trace_2018"]
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
       alibaba_cluster_trace_2018: 2.314427
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]
-  - _target_: tsfm.data.builder.lotsa_v1.GluonTSDatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.GluonTSDatasetBuilder
     datasets: ["elecdemand", "m4_hourly", "monash_m3_other", "monash_m3_quarterly", "australian_electricity_demand"]
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
@@ -95,26 +95,26 @@ _args_:
       monash_m3_quarterly: 1.567337
       australian_electricity_demand: 7387.791611
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]
-  - _target_: tsfm.data.builder.lotsa_v1.LibCityDatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.LibCityDatasetBuilder
     datasets: ["PEMS08"]
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
       PEMS08: 571.767669
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]
-  - _target_: tsfm.data.builder.lotsa_v1.OthersLOTSADatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.OthersLOTSADatasetBuilder
     datasets: ["godaddy", "beijing_air_quality"]
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
       godaddy: 1.312863
       beijing_air_quality: 1122.785706
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]
-  - _target_: tsfm.data.builder.lotsa_v1.ProEnFoDatasetBuilder
+  - _target_: uni2ts.data.builder.lotsa_v1.ProEnFoDatasetBuilder
     datasets: ["gfc14_load", "gfc17_load", "spain", "pdb", "elf", "covid19_energy"]
     storage_path: ${env_get:LOTSA_FILTER_PATH}
     weight_map:
@@ -125,5 +125,5 @@ _args_:
       elf: 697.802478
       covid19_energy: 1021.855391
     sample_time_series:
-      _target_: tsfm.data.dataset.SampleTimeSeriesType
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
       _args_: ["proportional"]

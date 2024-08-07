@@ -45,7 +45,7 @@ trainer:
   enable_progress_bar: true
   accumulate_grad_batches: 1
   gradient_clip_val: 1.0
-  gradient_clip_algorithm: norm
+  gradient_clip_algorithm: value
 train_dataloader:
   _target_: uni2ts.data.loader.DataLoader
   batch_size: 128
