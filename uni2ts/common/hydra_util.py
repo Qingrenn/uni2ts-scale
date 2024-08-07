@@ -18,6 +18,7 @@ from typing import Any
 
 from hydra.utils import get_class
 from omegaconf import OmegaConf
+from uni2ts.common.env import env
 
 
 def register_resolver(name: str) -> Callable[[Callable], Callable]:
@@ -49,3 +50,8 @@ def resolve_floordiv(a: int, b: int) -> int:
 @register_resolver("mul")
 def resolve_mul(a: float, b: float) -> float:
     return a * b
+
+
+@register_resolver("env_get")
+def resolve_env_attr(attr_name: str) -> Any:
+    return getattr(env, attr_name, None)
