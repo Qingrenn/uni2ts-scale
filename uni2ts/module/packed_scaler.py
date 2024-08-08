@@ -43,9 +43,9 @@ class PackedScaler(nn.Module):
             )
 
         loc, scale = self._get_loc_scale(
-            target.double(), observed_mask, sample_id, variate_id
+            target, observed_mask, sample_id, variate_id
         )
-        return loc.float(), scale.float()
+        return loc.to(target.dtype), scale.to(target.dtype)
 
     def _get_loc_scale(
         self,

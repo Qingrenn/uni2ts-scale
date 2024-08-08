@@ -8,16 +8,16 @@ defaults:
   - _self_
 run_name: ???
 seed: 0
-tf32: true
+tf32: false
 compile: false  # set to mode: default, reduce-overhead, max-autotune
 ckpt_path: null  # set to "last" to resume training
 trainer:
   _target_: lightning.Trainer
   accelerator: auto
-  strategy: ddp
+  strategy: fsdp
   devices: auto
   num_nodes: 1
-  precision: 32
+  precision: 16
   logger:
       _target_: lightning.pytorch.loggers.TensorBoardLogger
       save_dir: ${hydra:runtime.output_dir}
@@ -41,11 +41,11 @@ trainer:
       every_n_epochs: ${floordiv:${trainer.max_epochs},10}
   # epoch-based training provides averaged metrics
   # cannot use max_steps with epoch-based training - resume from checkpoint on wrong epoch
-  max_epochs: 1_000
+  max_epochs: 2_000
   enable_progress_bar: true
   accumulate_grad_batches: 1
   gradient_clip_val: 1.0
-  gradient_clip_algorithm: norm
+  gradient_clip_algorithm: value
 train_dataloader:
   _target_: uni2ts.data.loader.DataLoader
   batch_size: 128
