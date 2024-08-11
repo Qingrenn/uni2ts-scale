@@ -81,6 +81,7 @@ class MoiraiForecast(L.LightningModule):
         module: Optional[MoiraiModule] = None,
         patch_size: int | str = "auto",
         num_samples: int = 100,
+        checkpoint: Optional[str] = None,
     ):
         assert (module is not None) or (
             module_kwargs is not None
@@ -89,6 +90,8 @@ class MoiraiForecast(L.LightningModule):
         self.save_hyperparameters(ignore=["module"])
         self.module = MoiraiModule(**module_kwargs) if module is None else module
         self.per_sample_loss_func = SampleNLLLoss()
+        if checkpoint is not None:
+            self.load_state_dict(torch.load(checkpoint)["state_dict"])
 
     @contextmanager
     def hparams_context(
