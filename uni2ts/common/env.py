@@ -30,6 +30,7 @@ def get_path_var(var: Optional[str]) -> Optional[Path]:
 class Env:
     _instance: Optional["Env"] = None
     path_vars: list[str] = [
+        "LOTSA_16B_PATH",
         "LOTSA_V1_PATH",
         "LSF_PATH",
         "CUSTOM_DATA_PATH",

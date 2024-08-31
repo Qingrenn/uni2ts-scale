@@ -35,7 +35,10 @@ class PatchSizeConstraints(abc.ABC):
     def _get_boundaries(self, n: int, offset_name: str) -> tuple[int, int]: ...
 
     def __call__(self, freq: str) -> range:
-        offset = pd.tseries.frequencies.to_offset(freq)
+        try:
+            offset = pd.tseries.frequencies.to_offset(freq)
+        except Exception as e:
+            offset = pd.tseries.frequencies.to_offset("H")
         start, stop = self._get_boundaries(offset.n, norm_freq_str(offset.name))
         return range(start, stop + 1)
 

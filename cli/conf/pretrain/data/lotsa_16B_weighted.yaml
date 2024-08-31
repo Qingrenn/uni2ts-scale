@@ -1,0 +1,117 @@
+_target_: uni2ts.data.builder.ConcatDatasetBuilder
+_args_:
+  - _target_: uni2ts.data.builder.lotsa_v1.Buildings900KDatasetBuilder
+    datasets: ${cls_getattr:${._target_},dataset_list}
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      buildings_900k: 0.74
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.BuildingsBenchDatasetBuilder
+    datasets: ["sceaux", "bdg-2_panther", "bdg-2_fox", "bdg-2_bear"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      sceaux: 2.88
+      bdg-2_panther: 0.74
+      bdg-2_fox: 1.45
+      bdg-2_bear: 1.37
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.CloudOpsTSFDatasetBuilder
+    datasets: ["azure_vm_traces_2017", "borg_cluster_data_2011", "alibaba_cluster_trace_2018"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      azure_vm_traces_2017: 0.47
+      borg_cluster_data_2011: 0.63
+      alibaba_cluster_trace_2018: 0.28
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.CMIP6DatasetBuilder
+    datasets: ['cmip6_1850', 'cmip6_1855']
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      cmip6_1850: 14.74
+      cmip6_1855: 14.74
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.ERA5DatasetBuilder
+    datasets: ['era5_1989', 'era5_1990']
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      era5_1989: 9.56
+      era5_1990: 9.56
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.GluonTSDatasetBuilder
+    datasets: ["wiki-rolling_nips", "solar_power", "elecdemand", "kaggle_web_traffic_weekly", "traffic_weekly", "australian_electricity_demand"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      wiki-rolling_nips: 0.072
+      solar_power: 622.54
+      elecdemand: 1.47
+      kaggle_web_traffic_weekly: 0.01
+      traffic_weekly: 0.01
+      australian_electricity_demand: 19.42
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.LargeSTDatasetBuilder
+    datasets: ["largest_2017", "largest_2018", "largest_2019", "largest_2020", "largest_2021"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      largest_2017: 8.84
+      largest_2018: 8.85
+      largest_2019: 8.85
+      largest_2020: 8.87
+      largest_2021: 8.85
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.LibCityDatasetBuilder
+    datasets: ["LOOP_SEATTLE", "PEMS04", "PEMS07", "PEMS08", "PEMS_BAY", "Q-TRAFFIC"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      LOOP_SEATTLE: 8.85
+      PEMS04: 4.29
+      PEMS07: 2.38
+      PEMS08: 4.51
+      PEMS_BAY: 4.39
+      Q-TRAFFIC: 0.49
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.OthersLOTSADatasetBuilder
+    datasets: ["favorita_sales", "AtrialFibrillation", "BIDMC32HR", "IEEEPPG", "MotorImagery", "PigArtPressure", "PigCVP", "SelfRegulationSCP1", "SelfRegulationSCP2", "TDBrain"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      favorita_sales: 0.10
+      AtrialFibrillation: 0.05
+      BIDMC32HR: 0.34
+      IEEEPPG: 0.08
+      MotorImagery: 0.25
+      PigArtPressure: 0.17
+      PigCVP: 0.17
+      SelfRegulationSCP1: 0.08
+      SelfRegulationSCP2: 0.10
+      TDBrain: 0.22
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]
+  - _target_: uni2ts.data.builder.lotsa_v1.ProEnFoDatasetBuilder
+    datasets: ["gfc14_load", "gfc17_load", "spain", "pdb", "elf", "covid19_energy"]
+    storage_path: ${env_get:LOTSA_16B_PATH}
+    weight_map:
+      gfc14_load: 1.47
+      gfc17_load: 1.48
+      spain: 2.95
+      pdb: 1.47
+      elf: 1.83
+      covid19_energy: 2.59
+    sample_time_series:
+      _target_: uni2ts.data.dataset.SampleTimeSeriesType
+      _args_: ["proportional"]

@@ -773,6 +773,7 @@ class OthersLOTSADatasetBuilder(LOTSADatasetBuilder):
         "cdc_fluview_ilinet",
         "cdc_fluview_who_nrevss",
         "project_tycho",
+        "AtrialFibrillation", "BIDMC32HR", "IEEEPPG", "MotorImagery", "PigArtPressure", "PigCVP", "SelfRegulationSCP1", "SelfRegulationSCP2", "TDBrain"
     ]
     dataset_type_map = defaultdict(lambda: TimeSeriesDataset) | {
         dataset: MultiSampleTimeSeriesDataset for dataset in MULTI_SAMPLE_DATASETS
