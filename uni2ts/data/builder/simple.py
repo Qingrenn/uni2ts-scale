@@ -249,6 +249,7 @@ class SimpleEvalDatasetBuilder(DatasetBuilder):
     context_length: Optional[int]
     patch_size: Optional[int]
     storage_path: Path = env.CUSTOM_DATA_PATH
+    sample_time_series: Optional[SampleTimeSeriesType] = SampleTimeSeriesType.NONE
 
     def __post_init__(self):
         self.storage_path = Path(self.storage_path)
@@ -292,6 +293,7 @@ class SimpleEvalDatasetBuilder(DatasetBuilder):
                 context_length=self.context_length,
                 patch_size=self.patch_size,
             ),
+            sample_time_series=self.sample_time_series,
         )
 
 

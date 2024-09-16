@@ -57,10 +57,28 @@ from uni2ts.transform import (
     SelectFields,
     SequencifyField,
     Transformation,
+    EvalPadv2,
+    EvalCropv2,
+    EvalMaskedPrediction,
+    FixedPatchSizeConstraints,
 )
 
+import math
 from .module import MoiraiModule
-
+from uni2ts.val.metrics import (
+    MSE_mean,
+    MAE_mean,
+    MSE_median,
+    MAE_median,
+    MASE,
+    MAPE,
+    SMAPE,
+    RMSE,
+    NRMSE,
+    ND,
+    CRPS,
+    MeanWeightedSumQuantileLoss
+)
 
 class MoiraiPretrain(L.LightningModule):
     seq_fields: tuple[str, ...] = (
@@ -94,7 +112,9 @@ class MoiraiPretrain(L.LightningModule):
         beta1: float = 0.9,
         beta2: float = 0.98,
         loss_func: PackedDistributionLoss = PackedNLLLoss(),
-        val_metric: Optional[PackedLoss | list[PackedLoss]] = None,
+        val_metric: Optional[PackedLoss | list[PackedLoss]] = [
+            MSE_mean() ,MAE_mean(), MSE_median(), MAE_median(), MASE(), MAPE(), SMAPE(), RMSE(), NRMSE(), ND(), CRPS(), MeanWeightedSumQuantileLoss()
+        ],
         lr: float = 1e-3,
         weight_decay: float = 1e-2,
         log_on_step: bool = False,
@@ -198,6 +218,9 @@ class MoiraiPretrain(L.LightningModule):
         distr = self(
             **{field: batch[field] for field in list(self.seq_fields) + ["sample_id"]}
         )
+        preds = distr.sample(torch.Size((self.hparams.num_samples, ))) # sample batch time features
+        preds = preds.transpose(0, 1) # batch sample time features
+        
         val_loss = self.hparams.loss_func(
             pred=distr,
             **{
@@ -224,6 +247,7 @@ class MoiraiPretrain(L.LightningModule):
             sync_dist=True,
             batch_size=batch_size,
             rank_zero_only=True,
+            add_dataloader_idx=True,
         )
 
         if self.hparams.val_metric is not None:
@@ -233,16 +257,16 @@ class MoiraiPretrain(L.LightningModule):
                 else [self.hparams.val_metric]
             )
             for metric_func in val_metrics:
-                if isinstance(metric_func, PackedPointLoss):
-                    pred = distr.sample(torch.Size((self.hparams.num_samples,)))
-                    pred = torch.median(pred, dim=0).values
-                elif isinstance(metric_func, PackedDistributionLoss):
-                    pred = distr
-                else:
-                    raise ValueError(f"Unsupported loss function: {metric_func}")
+                # if isinstance(metric_func, PackedPointLoss):
+                #     pred = distr.sample(torch.Size((self.hparams.num_samples,)))
+                #     pred = torch.median(pred, dim=0).values
+                # elif isinstance(metric_func, PackedDistributionLoss):
+                #     pred = distr
+                # else:
+                #     raise ValueError(f"Unsupported loss function: {metric_func}")
 
                 metric = metric_func(
-                    pred=pred,
+                    pred=preds,
                     **{
                         field: batch[field]
                         for field in [
@@ -265,6 +289,7 @@ class MoiraiPretrain(L.LightningModule):
                     sync_dist=True,
                     batch_size=batch_size,
                     rank_zero_only=True,
+                    add_dataloader_idx=True,
                 )
 
         return val_loss
@@ -486,3 +511,120 @@ class MoiraiPretrain(L.LightningModule):
             )
 
         return defaultdict(lambda: default_train_transform)
+
+    @property
+    def val_transform_map(
+        self,
+    ) -> dict[str | type, Callable[..., Transformation]]:
+        def default_val_transform(
+            offset: int,
+            distance: int,
+            prediction_length: int,
+            context_length: int,
+            patch_size: int,
+        ):
+            return (
+                SampleDimension(
+                    max_dim=4,
+                    fields=("target",),
+                    optional_fields=(),
+                )
+                + GetPatchSize(
+                    min_time_patches=2,
+                    target_field="target",
+                    patch_sizes=self.module.patch_sizes,
+                    patch_size_constraints=FixedPatchSizeConstraints(patch_size),
+                    offset=True,
+                )
+                + EvalCropv2(
+                    offset,
+                    distance,
+                    prediction_length,
+                    context_length,
+                    fields=("target",),
+                    optional_fields=(),
+                )
+                + PackFields(
+                    output_field="target",
+                    fields=("target",),
+                )
+                + EvalPadv2(
+                    prediction_length=prediction_length,
+                    context_length=context_length,
+                    patch_size=patch_size,
+                    fields=("target",),
+                    optional_fields=()
+                )
+                + AddObservedMask(
+                    fields=("target",),
+                    optional_fields=(),
+                    observed_mask_field="observed_mask",
+                    collection_type=dict,
+                )
+                + ImputeTimeSeries(
+                    fields=("target",),
+                    optional_fields=(),
+                    imputation_method=DummyValueImputation(value=0.0),
+                )
+                + Patchify(
+                    max_patch_size=max(self.module.patch_sizes),
+                    fields=("target", "observed_mask"),
+                    optional_fields=(),
+                )
+                + AddVariateIndex(
+                    fields=("target",),
+                    optional_fields=(),
+                    variate_id_field="variate_id",
+                    expected_ndim=3,
+                    max_dim=self.hparams.max_dim,
+                    randomize=True,
+                    collection_type=dict,
+                )
+                + AddTimeIndex(
+                    fields=("target",),
+                    optional_fields=(),
+                    time_id_field="time_id",
+                    expected_ndim=3,
+                    collection_type=dict,
+                )
+                + EvalMaskedPrediction(
+                    mask_length=math.ceil(prediction_length / patch_size),
+                    target_field="target",
+                    truncate_fields=("variate_id", "time_id", "observed_mask"),
+                    optional_truncate_fields=(),
+                    prediction_mask_field="prediction_mask",
+                    expected_ndim=3,
+                )
+                + ExtendMask(
+                    fields=tuple(),
+                    optional_fields=(),
+                    mask_field="prediction_mask",
+                    expected_ndim=3,
+                )
+                + FlatPackCollection(
+                    field="variate_id",
+                    feat=False,
+                )
+                + FlatPackCollection(
+                    field="time_id",
+                    feat=False,
+                )
+                + FlatPackCollection(
+                    field="prediction_mask",
+                    feat=False,
+                )
+                + FlatPackCollection(
+                    field="observed_mask",
+                    feat=True,
+                )
+                + FlatPackFields(
+                    output_field="target",
+                    fields=("target",),
+                    optional_fields=(),
+                    feat=True,
+                )
+                + SequencifyField(field="patch_size", target_field="target")
+                + SelectFields(fields=list(self.seq_fields))
+            )
+
+        return defaultdict(lambda: default_val_transform)

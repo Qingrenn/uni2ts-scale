@@ -193,6 +193,7 @@ class EvalDataset(TimeSeriesDataset):
         windows: int,
         indexer: Indexer[dict[str, Any]],
         transform: Transformation,
+        sample_time_series: SampleTimeSeriesType = SampleTimeSeriesType.NONE,
     ):
         """
         :param windows: number of windows to perform evaluation on
@@ -200,7 +201,7 @@ class EvalDataset(TimeSeriesDataset):
         super().__init__(
             indexer,
             transform,
-            SampleTimeSeriesType.NONE,
+            sample_time_series,
             dataset_weight=windows,
         )
 

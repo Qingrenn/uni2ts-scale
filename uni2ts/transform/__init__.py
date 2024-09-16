@@ -14,11 +14,11 @@
 #  limitations under the License.
 
 from ._base import Chain, Identity, Transformation
-from .crop import EvalCrop, PatchCrop
+from .crop import EvalCrop, PatchCrop, EvalCropv2
 from .feature import AddObservedMask, AddTimeIndex, AddVariateIndex
 from .field import LambdaSetFieldIfNotPresent, RemoveFields, SelectFields, SetValue
 from .imputation import DummyValueImputation, ImputeTimeSeries, LastValueImputation
-from .pad import EvalPad, Pad, PadFreq
+from .pad import EvalPad, Pad, PadFreq, EvalPadv2
 from .patch import (
     DefaultPatchSizeConstraints,
     FixedPatchSizeConstraints,
@@ -71,4 +71,6 @@ __all__ = [
     "SetValue",
     "Transformation",
     "Transpose",
+    "EvalPadv2",
+    "EvalCropv2"
 ]

@@ -144,3 +144,51 @@ class EvalCrop(MapFuncMixin, Transformation):
             assert 0 >= b > a >= -time
 
         return a, b
+
+
+@dataclass
+class EvalCropv2(MapFuncMixin, Transformation):
+    offset: int
+    distance: int
+    prediction_length: int
+    context_length: int
+    fields: tuple[str, ...]
+    optional_fields: tuple[str, ...] = tuple()
+
+    def __call__(self, data_entry: dict[str, Any]) -> dict[str, Any]:
+        a, b = self._get_boundaries(data_entry)
+        self.map_func(
+            partial(self._crop, a=a, b=b),  # noqa
+            data_entry,
+            self.fields,
+            optional_fields=self.optional_fields,
+        )
+        return data_entry
+
+    @staticmethod
+    def _crop(data_entry: dict[str, Any], field: str, a: int, b: int) -> Sequence:
+        return [ts[a : b or None] for ts in data_entry[field]]
+
+    def _get_boundaries(self, data_entry: dict[str, Any]) -> tuple[int, int]:        
+        field: list[UnivarTimeSeries] = data_entry[self.fields[0]]
+        time = field[0].shape[0]
+        
+        if self.context_length == -7777:
+            if time <= 1000 + self.prediction_length:
+                a, b = 0, time
+            else:
+                a = 0
+                b = a + 1000 + self.prediction_length
+            return a, b
+        
+        window = data_entry["window"]
+        fcst_start = self.offset + window * self.distance
+        a = fcst_start - self.context_length
+        b = fcst_start + self.prediction_length
+
+        if self.offset >= 0:
+            assert time >= b > a >= 0, f"{time}, {b}, {a}"
+        else:
+            assert 0 >= b > a >= -time
+
+        return a, b

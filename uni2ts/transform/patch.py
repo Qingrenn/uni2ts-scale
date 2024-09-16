@@ -39,6 +39,10 @@ class PatchSizeConstraints(abc.ABC):
             offset = pd.tseries.frequencies.to_offset(freq)
         except Exception as e:
             offset = pd.tseries.frequencies.to_offset("H")
+        
+        if freq == "" or offset is None:
+            offset = pd.tseries.frequencies.to_offset("H")
+    
         start, stop = self._get_boundaries(offset.n, norm_freq_str(offset.name))
         return range(start, stop + 1)
 
@@ -154,7 +158,7 @@ class Patchify(MapFuncMixin, Transformation):
     def _patchify_arr(
         self, arr: Num[np.ndarray, "var time*patch"], patch_size: int
     ) -> Num[np.ndarray, "var time max_patch"]:
-        assert arr.shape[-1] % patch_size == 0
+        assert arr.shape[-1] % patch_size == 0, f"{arr.shape[-1]} % {patch_size} != 0"
         arr = rearrange(arr, "... (time patch) -> ... time patch", patch=patch_size)
         pad_width = [(0, 0) for _ in range(arr.ndim)]
         pad_width[-1] = (0, self.max_patch_size - patch_size)
